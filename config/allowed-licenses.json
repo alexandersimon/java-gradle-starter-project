@@ -1,0 +1,34 @@
+{
+  "allowedLicenses": [
+    {
+      "moduleLicense": "Apache License, Version 2.0"
+    },
+    {
+      "moduleLicense": "Eclipse Public License - v1.0"
+    },
+    {
+      "moduleLicense": "Esri License Agreement, E204"
+    },
+    {
+      "moduleLicense": "GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception"
+    },
+    {
+      "moduleLicense": "MIT License"
+    },
+    {
+      "moduleLicense": "IBM International Program License Agreement"
+    },
+    {
+      "moduleLicense": "CDDL + GPLv2 with classpath exception"
+    },
+    {
+      "moduleLicense": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0"
+    },
+    {
+      "moduleLicense": "Bouncy Castle Licence"
+    },
+    {
+      "moduleLicense": "The JSON License"
+    }
+  ]
+}
