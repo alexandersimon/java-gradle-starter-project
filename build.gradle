@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Esri
+ * Copyright 2022 Alexander Simon
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -17,6 +17,11 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.12'
+    id 'org.springframework.boot' version '2.6.6'
+    id 'org.springdoc.openapi-gradle-plugin' version '1.3.4'
+    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+    id "org.openapi.generator" version "6.0.1"
+    id 'com.github.jk1.dependency-license-report' version '2.0'
 }
 
 ext {
@@ -35,10 +40,16 @@ configurations {
 }
 
 dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springdoc:springdoc-openapi-ui:1.6.9"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
     implementation "com.esri.arcgisruntime:arcgis-java:$arcgisVersion"
     natives "com.esri.arcgisruntime:arcgis-java-jnilibs:$arcgisVersion"
     natives "com.esri.arcgisruntime:arcgis-java-resources:$arcgisVersion"
-    runtimeOnly "org.slf4j:slf4j-nop:1.7.32"
+    implementation "com.ibm.mq:com.ibm.mq.allclient:9.2.5.0"
 }
 
 javafx {
@@ -57,5 +68,48 @@ task copyNatives(type: Copy) {
 
 run {
     dependsOn copyNatives
-    mainClassName = 'com.mycompany.app.App'
+    mainClassName = 'com.example.SpringbootSwaggerApplication'
+}
+
+check {
+    dependsOn checkLicense
+}
+
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter
+import com.github.jk1.license.render.CsvReportRenderer
+import com.github.jk1.license.render.XmlReportRenderer
+import com.github.jk1.license.render.InventoryHtmlReportRenderer
+import com.github.jk1.license.render.TextReportRenderer
+
+apply plugin: 'com.github.jk1.dependency-license-report'
+
+licenseReport {
+    configurations = ALL
+    allowedLicensesFile = new File("$projectDir/config/allowed-licenses.json")
+    //filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/config/license-normalizer-bundle.json"), new ExcludeTransitiveDependenciesFilter()]
+    filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/config/license-normalizer-bundle.json")]
+    renderers = [new XmlReportRenderer('third-party-libs.xml', 'Back-End Libraries'),
+                 new InventoryHtmlReportRenderer('third-party-libs.html', 'Back-End Libraries'),
+                 new TextReportRenderer('third-party-libs.txt'),
+                 new CsvReportRenderer('third-party-libs.csv')]
+}
+
+//outputFileName.set("openapi-example.json")
+//waitTimeInSeconds.set(10)
+//forkProperties.set("-Dspring.profiles.active=special")
+openApi {
+    apiDocsUrl.set("http://localhost:8080/api-docs")
+    outputDir.set(file("$buildDir/open-api"))
+    groupedApiMappings.set(["http://localhost:8080/api-docs/internal": "openapi-internal.json",
+                            "http://localhost:8080/api-docs/external": "openapi-external.json"])
+}
+
+openApiGenerate {
+    generatorName = "html"
+    inputSpec = "$buildDir/open-api/openapi-external.json".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "com.example.api"
+    invokerPackage = "com.example.invoker"
+    modelPackage = "com.example.model"
 }
